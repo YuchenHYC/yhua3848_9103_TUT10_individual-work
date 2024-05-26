@@ -96,7 +96,6 @@ function draw(){
   drawSemiCircles();
   drawApples();
   drawTreeBranches();
-  
 }
 
 function drawBG(x, y, w, h, a, r, g, b){
@@ -107,38 +106,45 @@ function drawBG(x, y, w, h, a, r, g, b){
 }
 
 function drawGradientRect(x, y, w, h, c1, c2){
-    for (let i = 0; i <= h; i+=0.3) {
-      let inter = map(i, 0, h, 0, 1);
-      //lerpColor(c1, c2, amt), blends two colors to find a third color between them.
-      //reference: https://p5js.org/reference/#/p5/lerpColor
-      let c = lerpColor(c1, c2, inter);
-      stroke(c);
-      line(x, y + i, x + w, y + i);
+  for (let i = 0; i <= h; i+=0.3) {
+    let inter = map(i, 0, h, 0, 1);
+    //lerpColor(c1, c2, amt), blends two colors to find a third color between them.
+    //reference: https://p5js.org/reference/#/p5/lerpColor
+    let c = lerpColor(c1, c2, inter);
+    stroke(c);
+    line(x, y + i, x + w, y + i);
   }
 }
 
 //use Perlin Noise to draw background points and texture
 function DrawPoints(sx,sy,rectWidth,rectHeight,density,r,g,b){
-  strokeWeight(1);
-    for (i = 0; i < 1; i++) {
-      stroke(r, g, b);
-      for (x = 1; x < rectWidth; x++) {
-        for (y = 0; y < rectHeight; y++) {
-          let n = noise(x * 0.02, y * 0.02);
-          if (random(1) > 0.9 - 0.01 * i - n / 5) {
-            //randomize stroke weight to simulate texture 
-            strokeWeight(
-              random(
-                0.2 + density - n / 10,
-                0.3 + density - n / 10
-              )
-            );
-            point(sx + x + random(-2, 2), sy + y + random(-3, 3));
-          }
+strokeWeight(1);
+// Outer loop for potential iterative enhancements, currently runs once
+  for (i = 0; i < 1; i++) {
+     // Set the stroke color to the given RGB values
+    stroke(r, g, b);
+     // Loop through the width of the rectangle
+    for (x = 1; x < rectWidth; x++) {
+       // Loop through the height of the rectangle
+      for (y = 0; y < rectHeight; y++) {
+        // Generate a noise value based on the current position
+        let n = noise(x * 0.02, y * 0.02);
+        if (random(1) > 0.9 - 0.01 * i - n / 5) {
+          //randomize stroke weight to simulate texture   
+          strokeWeight(
+            random(
+              0.2 + density - n / 10,
+              0.3 + density - n / 10
+            )
+          );
+          // Draw the point with a random offset to create a more natural texture
+          point(sx + x + random(-2, 2), sy + y + random(-3, 3));
         }
       }
     }
-    noLoop();
+  }
+  // Stop the draw loop to render only once
+  noLoop();
 }
 
 //our group name
