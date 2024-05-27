@@ -76,8 +76,21 @@ let groundPoints = [
 ]
 
 function setup() {
-  createCanvas(914, 1300); // 2x amplification from the original size (457x1300)
+  let canvas = createCanvas(914, 1300); // 2x amplification from the original size (457x1300)
+
+  canvas.style('width', '100%'); // Set width to 100% of container via CSS
+  canvas.style('height', 'auto'); // Auto adjust height to maintain aspect ratio via CSS
+
   colorMode(RGB); 
+}
+
+/*
+we know this is not the ideal way to make window responsive. 
+But since most elements in this project have a fixed position, 
+it's hard to change them all in a systematic way through one scale factor.
+Therefore, we are inspired by Chrome's responsive dimension and created a CSS style in html.
+*/
+function windowResized() {
 }
 
 function draw(){
