@@ -1,12 +1,48 @@
-# yhua3848_9103 TUT10 individual work
+# Individual Work: See Yourself as Wind
+>
 ## Instructions on how to interact with the work
-
+>
+Hello, here's Yuchen. I'll briefly give some instructions here.
+>
+This individual work includes three amination projects based on the group work of the apple tree. The three works are:
+1. snowing
+2. disappeared apples
+3. perpetual snowing ground
+>
+When you open the sketch file, you'll see the sketch in the middle of the screen, and the first animation, snowing, is running. Imagine your mouse as wind and attempt to <span style="color: blue;">move it horizontally or vertically</span>. You'll see how the snow changes its way under your control. 
+>
+Meanwhile, try to <span style="color: blue;">click the key "d" or "D"</span> to see what happens. Please attempt to keep clicking it until there's no more reaction. This is for the second animation.
+>
+The third----
 
 
 ## Details of animating the group code
 
 ### Description:
-I choose **interaction** as the way of animation. This is done by incorporating mouse or keyboard inputs. 
+>
+I choose **interaction** as the animation method. These are done by incorporating mouse and keyboard inputs. 
+>
+#### Animation 1: Snow
+In the first animation *snowing*, no specific elements in the image are animated. Instead, I transferred all elements in the sketch done in the group work into the background (see technical explanation below) to ensure snowing can run normally. Inspired by the [*Parallax Dots*](https://happycoding.io/tutorials/p5js/creating-classes/parallax-dots) in Happy Coding, I created a `class` for dots representing snow. In the class, I connected the movement of snow with the mouse's X position, so the further away the mouse is from the image, the faster the snow falls. Snow dots that fall out of the scope will re-emerge from the other side, controlled by conditionals `If-else`. I set the bottom limit as height / 1.18, the position of the ground in the sketch, to simulate the disappearance of snow when falling on the ground in reality. Meanwhile, I set 4 layers to make snow dots different in size and an index that can loop 500 times in `setup()`, which makes snowing more vivid. The class was run through the `for...of` loops in `snowMove()`in `draw()`.
+>
+Since this animation is controlled by mouse movement, it is different from Yishu's and George's animations in essence. Also, 4 layers, different sizes of snow dots, and the speed change of snow according to the mouse's position make this animation different from other members' works in performance.
+>
+Reference: [*Parallax Dots*](https://happycoding.io/tutorials/p5js/creating-classes/parallax-dots), Happy Coding.
+>
+![Figure 1](assets/parallax%20dots.gif)
+>
+#### Animation 2: Disappeared Apples
+>
+This animation changed apples (circles) in the group sketch, mainly performed as the visual disappearance of circles. By doing this, I put `drawApples()` and `drawTreeBranches()` out of the buffer created before, so all apples and the trunk will persistently re-draw following snow animation. But it's fine. I created a `Boolean` array called `visible` with the same length as the array `circles`. This array records whether each circle is visible, and I set all circles as true initially. Then, in `drawApples()`, I called an index i, which is used to check if each circle drawn by `for...of` loops are visible since for...of loops used to draw circles cannot offer the index of one specific circle. As I've set all circles as true, they are all visible temporarily and contained in the new array `visible`. Next, I called the function `keyPressed()`, in which I created an empty array `remaining` used to store indexes of visible circles. Since they are all visible, they are pushed into the array through `if` and `for...of` loops. Lastly, I selected a random index of the circle and turned it invisible by transferring its boolean value to false in another `if`, then drew the rest of the visible circles. This process is manually controlled by clicking the key d.
+>
+Performance: one random apple will disappear when you press d or D. The fast flash of red and green colors in each circle is intentional. Since this animation is related to the first one, in which your mouse represents the wind, and our group considers that the green represents leaves and the red represents the fruit, the flash is simulating a tree in heavy wind and snow, whose leaves are swaying fast. The disappearance of apples means the wind blows apples off gradually.
+>
+Again, this animation is controlled by the keyboard and will not start without clicking, which is the essential difference from other members' works. Also, this work only focuses on the disappearance of specific elements (circles) in the group sketch.
+>
+Reference: no reference.
+>
+#### Animation 3:
+>
 
 highlight the difference:
 
@@ -15,10 +51,11 @@ References to inspiration for animating my individual code
 
 
 ### Technical explanation:
-
-***About the buffer:***
-
-Since the animation is based on the persistent refreshment of the sketch, and our group work set fixed positions to nearly all elements (apples, trunk, and gound) in the sketch, I found that simply adding an animation through class was not a good way to achieve the ideal outcome because it would intervene some parameters of the original artwork used random and loops. Therefore, Yishu and I tried to transform the group work into a part of the background, which made it unable to influence the operation of animation. We achieved it through method [*createGraphics()*](https://p5js.org/reference/#/p5/createGraphics), which creates an offscreen drawing canvas (graphics buffer) and returns it as a p5.Graphics object. Similarly, if I want to change some tree elements per se, I need to put them out of the buffer box.
 >
+#### About the buffer:
+>
+Since the animation is based on the persistent refreshment of the sketch, and our group work set fixed positions to nearly all elements (apples, trunk, and gound) in the sketch, I found that simply adding an animation through class was not a good way to achieve the ideal outcome because it would intervene some parameters of the original artwork used random and loops. Therefore, Yishu and I tried to transform the group work into a part of the background, which made it unable to influence the operation of animation. We achieved it through method [`createGraphics()`](https://p5js.org/reference/#/p5/createGraphics), which creates an offscreen drawing canvas (graphics buffer) and returns it as a p5.Graphics object. Similarly, if I want to change some tree elements per se, I need to put them out of the buffer box.
+>
+Reference: [createGraphics()](https://p5js.org/reference/#/p5/createGraphics). p5.js reference.
 
 

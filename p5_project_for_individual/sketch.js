@@ -8,7 +8,7 @@ let buffer;
 
 //for the animation of snow
 const dots = [];
-const border = 2;
+const border = 10;
 
 //class of snow (the first animation of this individual work)
 //inspired by Parallax Dots in Happy Coding. 
@@ -142,7 +142,7 @@ let groundPoints = [
   {x: 160, y: 990}
 ]
 
-//This is for the second animation of this individual work: the disappearance of apples.
+//This is for the second animation of this individual work: disappeared apples.
 //Creates a Boolean array called visible with the same length as the array circles.
 //This array records whether each circle is visible. ALl circles are set as true initially.
 let visible = new Array(circles.length).fill(true);
@@ -168,9 +168,9 @@ function setup() {
   drawTreeRoot(buffer);
   drawSemiCircles(buffer);
 
-  // 3 layers and 400 dots are set to make snowing more vividly.
-  for (let layer = 1; layer <= 3; layer++) {
-    for (let i = 0; i < 400; i++) {
+  // 3 layers and 400 dots are set to make snowing more vivid.
+  for (let layer = 1; layer <= 4; layer++) {
+    for (let i = 0; i < 500; i++) {
       dots.push(new Snow(layer));
     }
   }
@@ -399,7 +399,7 @@ function keyPressed() {
     }
     //since all circles were set as true initially, all circles are in the array remaining. 
     //Now, select a random index of the circle and turn it to invisible by clicking d or D.
-    //then draw rest apples. So visually one apple disappeared.
+    //then draw the rest of the visible apples. So visually one apple disappeared.
     if (remaining.length > 0) {
       let randomApple = floor(random(remaining.length));
       visible[remaining[randomApple]] = false; 
