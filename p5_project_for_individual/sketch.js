@@ -1,3 +1,65 @@
+/*
+Set a buffer to all elements drawn in the group work, 
+so they can be set as a background picture in the individual work.
+In this way, the random attributes and loops of some functions in group work won't affect animation in the individual work.
+The buffer here is related to createGraphics() below.
+*/
+let buffer;
+
+//for the animation of snow
+const dots = [];
+const border = 2;
+
+//class of snow
+class Dot {
+  constructor(layer) {
+    this.layer = layer;
+    this.x = random(-border, width + border);
+    this.y = random(-border, height + border);
+    
+    // Randomly generate bright white and silver dots
+    this.fillColor = color(random(200, 255), random(200, 255), random(200, 255));
+    this.strokeColor = color(192); // Silver
+  }
+
+  draw() {
+    let deltaX = 0;
+    let deltaY = 0;
+
+    if(mouseX != 0 && mouseY != 0){
+      deltaX = -this.layer * map(mouseX - width / 2, 0, width, 0, 5);
+      deltaY = this.layer * 2; // Adjust speed by layer. 
+    }
+
+    this.x += deltaX;
+    this.y += deltaY;
+
+    if (this.x < -border) {
+      this.x = width + random(border);
+      this.y = random(0, height);
+    } else if (this.x > width + border) {
+      this.x = 0 - random(border);
+      this.y = random(0, height);
+    }
+
+    if (this.y < -border) {
+      this.y = height + random(border);
+      this.x = random(0, width);
+    } else if (this.y > height + border) {
+      this.y = 0 - random(border);
+      this.x = random(0, width);
+    }
+    
+    // Draw only when the dot is in the top half of the canvas
+    if (this.y < height / 1.18) {
+      fill(this.fillColor);
+      stroke(this.strokeColor);
+      strokeWeight(2);
+      circle(this.x, this.y, 10 / (4 - this.layer));
+    }
+  }
+}
+
 //lines for yellow branches and the bole. 
 //Deviation exists since all coordinates are from naked eyes through the coordinate plane.
 let segments = [
@@ -75,36 +137,34 @@ let groundPoints = [
   {x: 160, y: 990}
 ]
 
-/*
-Set a buffer to all elements drawn in the group work, 
-so they can be set as a background picture in the individual work.
-In this way, the random attributes and loops of some functions in group work won't affect animation in the individual work.
-*/
-let buffer;
-let shouldDraw = true;
-
 function setup() {
   createCanvas(914, 1300); // 2x amplification from the original size (457x1300)
+  //createGraphics() creates an offscreen drawing canvas (graphics buffer) and returns it as a p5.Graphics object. 
+  //Drawing to a separate graphics buffer can be helpful for performance and for organizing code.
+  //reference: p5.js ref. https://p5js.org/reference/#/p5/createGraphics
   buffer = createGraphics(914, 1300);
 
-  //shouldDraw is used to detect if functions in it should only be run once.
-  if (shouldDraw) {
-    buffer.background(169, 205, 201); //all RGB parameters are derived from https://pixspy.com/
-    drawBG(buffer, 55, 44, 800, 48, 3, 50, 67, 87); //draw the top background
-    drawGradientRect(buffer, 55, 92, 800, 584, color(210, 210, 198), color(246, 240, 224));  //the gradient white background
-    drawGradientRect(buffer, 55, 676, 800, 560, color(234, 224, 189), color(218, 203, 172));  //the gradient yellow background
-    drawBG(buffer, 80, 1115, 76, 69, 3, 50, 67, 87); //draw signature's background
-    drawBG(buffer, 55, 1235, 800, 15, 3, 50, 67, 87); //draw the bottom background
-    DrawPoints(buffer, 50, 44, 810, 1208, 3, 67, 96, 114); //draw background texture
+  buffer.background(169, 205, 201); //all RGB parameters are derived from https://pixspy.com/
+  drawBG(buffer, 55, 44, 800, 48, 3, 50, 67, 87); //draw the top background
+  drawGradientRect(buffer, 55, 92, 800, 584, color(210, 210, 198), color(246, 240, 224));  //the gradient white background
+  drawGradientRect(buffer, 55, 676, 800, 560, color(234, 224, 189), color(218, 203, 172));  //the gradient yellow background
+  drawBG(buffer, 80, 1115, 76, 69, 3, 50, 67, 87); //draw signature's background
+  drawBG(buffer, 55, 1235, 800, 15, 3, 50, 67, 87); //draw the bottom background
+  DrawPoints(buffer, 50, 44, 810, 1208, 3, 67, 96, 114); //draw background texture
 
-    //follow this sequence to avoid covering
-    ourGroupName(buffer);
-    drawGround(buffer);
-    drawTreeRoot(buffer);
-    drawSemiCircles(buffer);
-    drawApples(buffer);
-    drawTreeBranches(buffer);
-    shouldDraw = false;
+  //follow this sequence to avoid covering
+  ourGroupName(buffer);
+  drawGround(buffer);
+  drawTreeRoot(buffer);
+  drawSemiCircles(buffer);
+  drawApples(buffer);
+  drawTreeBranches(buffer);
+
+  // 3 layers and 400 dots are set to make snowing more vividly.
+  for (let layer = 1; layer <= 3; layer++) {
+    for (let i = 0; i < 400; i++) {
+      dots.push(new Dot(layer));
+    }
   }
   colorMode(RGB);
 }
@@ -121,6 +181,14 @@ function windowResized() {
 function draw() {
   image(buffer, 0, 0);
 
+  snowMove();
+
+}
+
+function snowMove(){
+  for (const dot of dots) {
+    dot.draw();
+  }
 }
 
 function drawBG(pg, x, y, w, h, a, r, g, b) {
