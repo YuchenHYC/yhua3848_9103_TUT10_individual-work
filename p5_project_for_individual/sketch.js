@@ -10,29 +10,34 @@ let buffer;
 const dots = [];
 const border = 2;
 
-//class of snow
-class Dot {
+//class of snow (the first animation of this individual work)
+//inspired by Parallax Dots in Happy Coding. 
+//reference: https://happycoding.io/tutorials/p5js/creating-classes/parallax-dots
+class Snow {
   constructor(layer) {
     this.layer = layer;
     this.x = random(-border, width + border);
     this.y = random(-border, height + border);
     
-    // Randomly generate bright white and silver dots
+    // Randomly generate bright white and silver dots with silver stroke.
     this.fillColor = color(random(200, 255), random(200, 255), random(200, 255));
     this.strokeColor = color(192); // Silver
   }
 
   draw() {
-    let deltaX = 0;
-    let deltaY = 0;
+    let snowMoveX = 0;
+    let snowMoveY = 0;
 
+    //make snowing can be controlled by mouse movement.
+    //imaging the mouse is wind. Moving mouse's X position can make snoing heavier because of stonger wind.
+    //But wind cannot make snowing from bottom to up. So I changed the mouseY's movement to make it drop persistently. 
+    //Now you controlled the power of wind! It's cool!
     if(mouseX != 0 && mouseY != 0){
-      deltaX = -this.layer * map(mouseX - width / 2, 0, width, 0, 5);
-      deltaY = this.layer * 2; // Adjust speed by layer. 
+      snowMoveX = -this.layer * map(mouseX - width / 2, 0, width, 0, 5);
+      snowMoveY = this.layer * 2; // Adjust speed by layer. 
     }
-
-    this.x += deltaX;
-    this.y += deltaY;
+    this.x += snowMoveX;
+    this.y += snowMoveY;
 
     if (this.x < -border) {
       this.x = width + random(border);
@@ -41,7 +46,6 @@ class Dot {
       this.x = 0 - random(border);
       this.y = random(0, height);
     }
-
     if (this.y < -border) {
       this.y = height + random(border);
       this.x = random(0, width);
@@ -50,7 +54,8 @@ class Dot {
       this.x = random(0, width);
     }
     
-    // Draw only when the dot is in the top half of the canvas
+    // height / 1.18 is the position of the ground.
+    // Snow falls to the ground, then visually disappeared. Make sense right?
     if (this.y < height / 1.18) {
       fill(this.fillColor);
       stroke(this.strokeColor);
@@ -137,6 +142,11 @@ let groundPoints = [
   {x: 160, y: 990}
 ]
 
+//This is for the second animation of this individual work: the disappearance of apples.
+//Creates a Boolean array called visible with the same length as the array circles.
+//This array records whether each circle is visible. ALl circles are set as true initially.
+let visible = new Array(circles.length).fill(true);
+
 function setup() {
   createCanvas(914, 1300); // 2x amplification from the original size (457x1300)
   //createGraphics() creates an offscreen drawing canvas (graphics buffer) and returns it as a p5.Graphics object. 
@@ -157,13 +167,11 @@ function setup() {
   drawGround(buffer);
   drawTreeRoot(buffer);
   drawSemiCircles(buffer);
-  drawApples(buffer);
-  drawTreeBranches(buffer);
 
   // 3 layers and 400 dots are set to make snowing more vividly.
   for (let layer = 1; layer <= 3; layer++) {
     for (let i = 0; i < 400; i++) {
-      dots.push(new Dot(layer));
+      dots.push(new Snow(layer));
     }
   }
   colorMode(RGB);
@@ -179,12 +187,21 @@ function windowResized() {
 }
 
 function draw() {
+  //many elements in the group work are contained in the buffer, becoming the background image.
   image(buffer, 0, 0);
 
+  //The two functions below are contained in the buffer initially as a part of the background.
+  //I put them out of the buffer, so they can be animated now.
+  //This is for the second animation.
+  drawApples();
+  drawTreeBranches();
+
+  //make snow moving. This is for the first animation.
   snowMove();
 
 }
 
+//use for...of loops to make all dots in the class Snow move.
 function snowMove(){
   for (const dot of dots) {
     dot.draw();
@@ -304,55 +321,89 @@ function drawSemiCircles(pg) {
 }
 
 //tree branches and trunk
-function drawTreeBranches(pg) {
+//this function is not in the buffer now for the operation of the second animation.
+function drawTreeBranches() {
   for (let seg of segments) {
-    pg.stroke(246, 189, 139); //yellow
-    pg.strokeWeight(4);
-    pg.line(seg.x1, seg.y1, seg.x2, seg.y2);
+    stroke(246, 189, 139); //yellow
+    strokeWeight(4);
+    line(seg.x1, seg.y1, seg.x2, seg.y2);
   }
 }
 
-// all circles/apples
-function drawApples(pg) {
+//all circles/apples
+//this function is not in the buffer now for the operation of the second animation.
+function drawApples() {
+  //call an index i, which is used to check if circles drawn by for...of loops are visible.
+  //This is for the second animation since for...of loops cannot offer the index of one specific circle.
+  //But to make circles disappear one by one, I need the index.
+  let i = 0;
   for (let circle of circles) {
-    pg.stroke(38, 49, 53); //black
-    pg.strokeWeight(6);
-    pg.noFill();
-    pg.ellipse(circle.x, circle.y, circle.size);
+    //Here it is. Check if circles are visible.  
+    if(visible[i]){ 
+      stroke(38, 49, 53); //black
+      strokeWeight(6);
+      noFill();
+      ellipse(circle.x, circle.y, circle.size);
 
-    //find points of intersection and calculate their polar coordinates
-    let intersections = [];
-    for (let seg of segments) {
-      //concat can concatenate two arrays. Here, it concatenates intersections and lineEllipseIntersection.
-      //it help us find and record all intersections.
-      //reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat
-      intersections = intersections.concat(lineEllipseIntersection(circle.x, circle.y, circle.size / 2, seg.x1, seg.y1, seg.x2, seg.y2));
+      //find points of intersection and calculate their polar coordinates
+      let intersections = [];
+      for (let seg of segments) {
+       //concat can concatenate two arrays. Here, it concatenates intersections and lineEllipseIntersection.
+       //it help us find and record all intersections.
+       //reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat
+       intersections = intersections.concat(lineEllipseIntersection(circle.x, circle.y, circle.size / 2, seg.x1, seg.y1, seg.x2, seg.y2));
+      }
+
+      //calculate polar coordinates
+      if (intersections.length === 2) {
+       //atan2(y, x) calculates the angle formed by a point, the origin, and the positive x-axis.
+       //it returns the arc tangent of the given point.
+       //reference: https://p5js.org/reference/#/p5/atan2
+       let angle1 = atan2(intersections[0].y - circle.y, intersections[0].x - circle.x);
+       let angle2 = atan2(intersections[1].y - circle.y, intersections[1].x - circle.x);
+
+       //create two arcs that constitute the circle according to angle1 and angle2
+       //fill green or red in two arcs randomly
+        if (random(1) < 0.5) {
+         fill(137, 184, 114); //green
+         //the left semi-circle of each circle.
+         arc(circle.x, circle.y, circle.size, circle.size, angle1, angle2, OPEN);
+         fill(253, 94, 99); //red
+         //the right semi-circle of each circle.
+         arc(circle.x, circle.y, circle.size, circle.size, angle2, angle1 + TWO_PI, OPEN);
+        }
+        else {
+         fill(253, 94, 99); //red
+         arc(circle.x, circle.y, circle.size, circle.size, angle1, angle2, OPEN);
+         fill(137, 184, 114); //green
+         arc(circle.x, circle.y, circle.size, circle.size, angle2, angle1 + TWO_PI, OPEN);
+        }
+      } 
     }
+    i++; // make the index increase once when drawing each circle, so we can know the exact index of every circle.
+  } 
+}
 
-    //calculate polar coordinates
-    if (intersections.length === 2) {
-      //atan2(y, x) calculates the angle formed by a point, the origin, and the positive x-axis.
-      //it returns the arc tangent of the given point.
-      //reference: https://p5js.org/reference/#/p5/atan2
-      let angle1 = atan2(intersections[0].y - circle.y, intersections[0].x - circle.x);
-      let angle2 = atan2(intersections[1].y - circle.y, intersections[1].x - circle.x);
-
-      //create two arcs that constitute the circle according to angle1 and angle2
-      //fill green or red in two arcs randomly
-      if (random(1) < 0.5) {
-        pg.fill(137, 184, 114); //green
-        //the left semi-circle of each circle.
-        pg.arc(circle.x, circle.y, circle.size, circle.size, angle1, angle2, OPEN);
-        pg.fill(253, 94, 99); //red
-        //the right semi-circle of each circle.
-        pg.arc(circle.x, circle.y, circle.size, circle.size, angle2, angle1 + TWO_PI, OPEN);
+function keyPressed() {
+  //When you pressed d or D, one random apple will disappear.
+  //d means drop, so you can imagine the wind controlled by mouse blows an apple off.
+  //By simply clicking a key, you will determine the fate of the tree in the wind and snow.
+  if (key === 'd' || key === 'D') {
+    let remaining = []; //Create an empty array to store indexes of visible circles.
+    let i = 0;
+    for (let isVisible of visible) {
+      if (isVisible) {
+        remaining.push(i); //if the circle is visible, its index will be included in the array.
       }
-      else {
-        pg.fill(253, 94, 99); //red
-        pg.arc(circle.x, circle.y, circle.size, circle.size, angle1, angle2, OPEN);
-        pg.fill(137, 184, 114); //green
-        pg.arc(circle.x, circle.y, circle.size, circle.size, angle2, angle1 + TWO_PI, OPEN);
-      }
+      i++;
+    }
+    //since all circles were set as true initially, all circles are in the array remaining. 
+    //Now, select a random index of the circle and turn it to invisible by clicking d or D.
+    //then draw rest apples. So visually one apple disappeared.
+    if (remaining.length > 0) {
+      let randomApple = floor(random(remaining.length));
+      visible[remaining[randomApple]] = false; 
+      drawApples();
     }
   }
 }
