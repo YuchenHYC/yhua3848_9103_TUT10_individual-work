@@ -21,7 +21,8 @@ After all apples/circles disappeared (i.e., you've clicked the key d or D 36 tim
 >
 I choose <span style="color: red;">*interaction*</span> as the animation method. These are done by incorporating mouse and keyboard inputs. 
 >
-#### Animation 1: Snow
+#### Animation 1: Snowing
+>
 In the first animation *snowing*, no specific elements in the image are animated. Instead, I transferred all elements in the sketch done in the group work into the background (see technical explanation below) to ensure snowing can run normally. Inspired by the [*Parallax Dots*](https://happycoding.io/tutorials/p5js/creating-classes/parallax-dots) in Happy Coding, I created a `class` for dots representing snow. In the class, I connected the movement of snow with the mouse's X position, so the further away the mouse is from the image, the faster the snow falls. Snow dots that fall out of the scope will re-emerge from the other side, controlled by conditionals `If-else`. I set the bottom limit as height / 1.18, the position of the ground in the sketch, to simulate the disappearance of snow when falling on the ground in reality. Meanwhile, I set 4 layers to make snow dots different in size and an index that can loop 500 times in `setup()`, which makes snowing more vivid. The class was run through the `for...of` loops in `snowMove()`in `draw()`.
 >
 Since this animation is controlled by mouse movement, it is different from Yishu's and George's animations in essence. Also, 4 layers, different sizes of snow dots, and the speed change of snow according to the mouse's position make this animation different from other members' works, particularly from Yishu's raining animation, in performance.
@@ -40,7 +41,7 @@ Again, this animation is controlled by the keyboard and will not start without c
 >
 Reference: no reference. Inspired by my brain.
 >
-#### Animation 3:
+#### Animation 3: Perpetual Snowing Ground
 >
 This animation will persistently add superposing white rectangles on the sketch to represent the idea of the world being gradually buried by heavy snow. It is performed by adding one layer of white rectangle each time from the bottom (the ground of the apple tree) to the top. Therefore, I set several variables to count the current layer, total layers, the current frame, total frames, and the frame when this animation starts. I then set a function called `snowGround()`, in which I used `min` and `map` to know which one is the current layer in the current frame from all layers, so they can be superposed one by one. I then used `for` loops to draw all layers with the set size and color (rectangles). This function is put into the `draw()`. 
 >
