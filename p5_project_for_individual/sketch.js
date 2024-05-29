@@ -1,16 +1,16 @@
 /*
 Set a buffer to all elements drawn in the group work, 
 so they can be set as a background picture in the individual work.
-In this way, the random attributes and loops of some functions in group work won't affect animation in the individual work.
+In this way, the random attributes and loops of some functions in group work won't affect animations in the individual work.
 The buffer here is related to createGraphics() below.
 */
 let buffer;
 
-//for the animation of snow
+//for the first animation: snowing
 const dots = [];
 const border = 10;
 
-//class of snow (the first animation of this individual work)
+//the class of snow dots
 //inspired by Parallax Dots in Happy Coding. 
 //reference: https://happycoding.io/tutorials/p5js/creating-classes/parallax-dots
 class Snow {
@@ -64,6 +64,17 @@ class Snow {
     }
   }
 }
+
+//These are for the third animation: perpetual snowing ground
+//the snowing ground consists of many superposing layers, simulating the change of the ground when snowing in reality.
+let snowingGroundHeight;
+let currentLayer = 0;
+let totalLayers = 50; // I set there are 50 layers, so it can be accumulated 50 times.
+let totalFrames = 240; // total frames for automatic animation
+let manualIncrease = 0; // this animation can be operated automatically and manually
+let startSnowingGround = false; // this animation won't run until one conditions is achieved.
+let dKeyPressCount = 0; // the viriable to count times. This animation will start after you pressed d 36 times.
+let animationStartFrame = 0; // after you pressed 36 times, this animation will get started from 0.
 
 //lines for yellow branches and the bole. 
 //Deviation exists since all coordinates are from naked eyes through the coordinate plane.
@@ -142,13 +153,14 @@ let groundPoints = [
   {x: 160, y: 990}
 ]
 
-//This is for the second animation of this individual work: disappeared apples.
+//This is for the second animation: disappeared apples.
 //Creates a Boolean array called visible with the same length as the array circles.
 //This array records whether each circle is visible. ALl circles are set as true initially.
 let visible = new Array(circles.length).fill(true);
 
 function setup() {
   createCanvas(914, 1300); // 2x amplification from the original size (457x1300)
+
   //createGraphics() creates an offscreen drawing canvas (graphics buffer) and returns it as a p5.Graphics object. 
   //Drawing to a separate graphics buffer can be helpful for performance and for organizing code.
   //reference: p5.js ref. https://p5js.org/reference/#/p5/createGraphics
@@ -156,8 +168,8 @@ function setup() {
 
   buffer.background(169, 205, 201); //all RGB parameters are derived from https://pixspy.com/
   drawBG(buffer, 55, 44, 800, 48, 3, 50, 67, 87); //draw the top background
-  drawGradientRect(buffer, 55, 92, 800, 584, color(210, 210, 198), color(246, 240, 224));  //the gradient white background
-  drawGradientRect(buffer, 55, 676, 800, 560, color(234, 224, 189), color(218, 203, 172));  //the gradient yellow background
+  drawGradientRect(buffer, 55, 92, 800, 584, color(210, 210, 198), color(246, 240, 224)); //the gradient white background
+  drawGradientRect(buffer, 55, 676, 800, 560, color(234, 224, 189), color(218, 203, 172)); //the gradient yellow background
   drawBG(buffer, 80, 1115, 76, 69, 3, 50, 67, 87); //draw signature's background
   drawBG(buffer, 55, 1235, 800, 15, 3, 50, 67, 87); //draw the bottom background
   DrawPoints(buffer, 50, 44, 810, 1208, 3, 67, 96, 114); //draw background texture
@@ -168,13 +180,18 @@ function setup() {
   drawTreeRoot(buffer);
   drawSemiCircles(buffer);
 
-  // 3 layers and 400 dots are set to make snowing more vivid.
+  colorMode(RGB);
+
+  //for the first animation: 3 layers and 400 dots are set to make snowing more vivid.
   for (let layer = 1; layer <= 4; layer++) {
     for (let i = 0; i < 500; i++) {
       dots.push(new Snow(layer));
     }
   }
-  colorMode(RGB);
+
+  //for the third animation
+  snowingGroundHeight = height / totalLayers; // determine the height of each layer
+  frameRate(24); // determine the frame rate according to total frames (240)
 }
 
 /*
@@ -196,15 +213,35 @@ function draw() {
   drawApples();
   drawTreeBranches();
 
-  //make snow moving. This is for the first animation.
+  //for the first animation: make snow dots moving.
   snowMove();
 
+  //for the third animation: draw the snow ground.
+  snowGround();
 }
 
-//use for...of loops to make all dots in the class Snow move.
+//for the first animation: use for...of loops to make all dots in the class Snow move.
 function snowMove(){
   for (const dot of dots) {
     dot.draw();
+  }
+}
+
+//for the third animation: decide how to draw the current layer
+function snowGround(){
+  if(startSnowingGround){
+    // the current frame of the current layer.
+    // so they can be superposed one by one.
+    let currentFrame = frameCount - animationStartFrame;
+    //min(): returns the smallest value in a sequence of numbers. Here, it's always the first one until the last draw.
+    //map(): the currentFrame's position in the target range [0, totalLayers] is propotional to its position in the original range [0, totalFrames].
+    //In this way we can always know the current layer in the current frame.
+    currentLayer = min(map(currentFrame, 0, totalFrames, 0, totalLayers) + manualIncrease, totalLayers);
+  }
+  for (let i = 0; i < currentLayer; i++) {
+    fill(color(random(250, 255), random(250, 255), random(250, 255))); // random RGB for mainly in white color
+    stroke(255); // white stroke
+    rect(50, height / 1.18 - (i + 1) * snowingGroundHeight, 809, snowingGroundHeight); // the size of each layer.
   }
 }
 
@@ -384,7 +421,9 @@ function drawApples() {
   } 
 }
 
+//this function works in the second and the third animations.
 function keyPressed() {
+  //for the second animation.
   //When you pressed d or D, one random apple will disappear.
   //d means drop, so you can imagine the wind controlled by mouse blows an apple off.
   //By simply clicking a key, you will determine the fate of the tree in the wind and snow.
@@ -404,6 +443,28 @@ function keyPressed() {
       let randomApple = floor(random(remaining.length));
       visible[remaining[randomApple]] = false; 
       drawApples();
+    }
+  }
+
+  //for the third animation.
+  //if the animation gets started and isn't finished yet, you can click the space key to manually add one layer each time.
+  if (key === ' ' && startSnowingGround && currentLayer < totalLayers) {
+    manualIncrease++;
+  }
+  //this conditional is used to determine when the third animation can get started.
+  //I set it will start after the second animation, namely after you pressed d/D 36 times (because there're 36 cirlces).
+  //so it creates an image that after all apples are blew off, snowing continues.
+  //the world is buried under heavy snow ---- that's cool!
+  if (key === 'd' || key === 'D') {
+    dKeyPressCount++;
+    if (dKeyPressCount >= circles.length && !startSnowingGround) {
+      startSnowingGround = true;
+      //the 3 resetting processes ensure that 
+      //the animation of snowing ground will start from 0 after pressing d / D 36 times,
+      //rather than invisibly run at the beginning.
+      animationStartFrame = frameCount; // Reset animation start frame
+      currentLayer = 0; // Reset current layer
+      manualIncrease = 0; // Reset manual increase
     }
   }
 }
